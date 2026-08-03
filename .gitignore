@@ -1,0 +1,41 @@
+# ---------- Keil MDK ----------
+*.o
+*.axf
+*.elf
+*.map
+*.dep
+*.iex
+*.htm
+*.lnp
+*.plg
+*.sct
+*.lst
+*.crf
+*.d
+Listing/
+Objects/
+Build/
+*.bak
+UV4*.bak
+
+# ---------- STM32CubeIDE / Eclipse ----------
+Debug/
+Release/
+*.launch
+.settings/
+.metadata/
+.cproject
+.project
+
+# ---------- GCC ARM 编译产物 ----------
+*.bin
+*.hex
+
+# ---------- 操作系统 / 编辑器 ----------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ---------- 本地私有配置 ----------
+.local/
