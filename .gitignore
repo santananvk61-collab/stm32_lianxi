@@ -39,3 +39,4 @@ Thumbs.db
 
 # ---------- 本地私有配置 ----------
 .local/
+.workbuddy/
