@@ -53,7 +53,7 @@ extern "C" {
 void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
-
+extern I2C_HandleTypeDef hi2c1;   /* OLED / DHT11 驱动文件要用这个 I2C 句柄 */
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
