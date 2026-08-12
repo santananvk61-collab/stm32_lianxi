@@ -6,10 +6,10 @@
 
 | 目录 | 内容 |
 |------|------|
-| `lianxi_1/` | 基础工程：板载 LED 闪烁；扩展 OLED(I2C) 显示 DHT11 温湿度 |
-| `LINK/` | 流水灯状态机练习（PA7/PA12/PA3 三路 LED） |
-| `interrupt/` | 外部中断（EXTI3）+ SysTick 状态机按键消抖练习 |
-| `key/` | 按键消抖练习（轮询 + 软件消抖） |
+| `lianxi_1_project/` | 基础工程：板载 LED 闪烁；扩展 OLED(I2C) 显示 DHT11 温湿度 |
+| `LINK_project/` | 流水灯状态机练习（PA7/PA12/PA3 三路 LED） |
+| `interrupt_project/` | 外部中断（EXTI3）+ SysTick 状态机按键消抖练习 |
+| `key_project/` | 按键消抖练习（轮询 + 软件消抖） |
 | `docs/` | 调试笔记与知识整理 |
 | `notes/` | 学习笔记 |
 
@@ -25,19 +25,19 @@
 
 ## 工程说明
 
-### lianxi_1
+### lianxi_1_project
 
 基础练习工程，主循环翻转板载 LED（PC13，500ms 周期）。在此基础上扩展了 0.96 寸 SSD1306 OLED（I2C，PB6/PB7）和 DHT11 温湿度传感器（单总线，PA0），每 2 秒读取一次并刷新屏幕。
 
-### LINK
+### LINK_project
 
 流水灯状态机练习。PA7、PA12、PA3 三路 LED 按 0~6 七个状态循环点亮，每个状态停留 100ms。
 
-### interrupt
+### interrupt_project
 
 外部中断按键练习。PA3 配置为 EXTI3 上升沿中断，按键状态机消抖在 SysTick 中断中每 1ms 调用一次 `Key_Scan()`（见 `Core/Src/ztj.c`），确认一次有效按下后翻转 PA12；主循环中 PA7 以 100ms 周期闪烁。
 
-### key
+### key_project
 
 按键消抖练习。PA8（上拉输入）与 PA3（下拉输入）两个按键，主循环轮询并做 20ms 软件消抖，控制 PA12、PA7 两路 LED。
 
