@@ -24,6 +24,7 @@ Release/
 *.launch
 .settings/
 .metadata/
+.metadata*/
 .cproject
 .project
 
