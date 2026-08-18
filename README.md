@@ -4,12 +4,16 @@
 
 用的是一块十几块钱的 Blue Pill（STM32F103C8Tx，Cortex-M3）。一开始我只会点亮一颗 LED，后来陆陆续续把 GPIO、定时器、串口、ADC、PWM、中断、DMA、I2C、单总线这些外设都摸了一遍。每个外设单独开了一个工程，代码里写满了中文注释，方便以后回头看——也方便有同样困惑的人照着走。
 
-## 外设学习工程
+工程按用途分成了两个文件夹：
 
-嵌入式入门有个规律：先跑通「点灯」这个最经典的 Hello World，再一个外设一个外设往外扩。下面的工程基本就是按我实际学习的顺序排的，每个只学一个外设，代码尽量只留最核心的部分：
+- **`learning_projects/`（学习工程）**——「9 大外设」的标准学习工程，每个只学一个外设，代码精简、注释齐全，适合照着入门。
+- **`practice_projects/`（练习工程）**——动手做的综合练习，功能更杂、串口变体较多，风格更随意。
+
+## learning_projects（学习工程）
+
+嵌入式入门有个规律：先跑通「点灯」这个最经典的 Hello World，再一个外设一个外设往外扩。这里每个工程只学一个外设：
 
 - **GPIO**（`gpio_project`）—— 点灯。套路就四步：开时钟 → 配置引脚 → 使用 → 死循环。
-- **TIM**（`TIM_project`）—— 定时器，用来数时间、产生周期事件。
 - **ADC**（`adc_project`）—— 把模拟电压变成数字，转出来的值直接控制 LED 闪多快。
 - **UART**（`uart_project`）—— 串口，让 MCU 跟电脑聊天。做的是「回声」：敲什么就回什么。
 - **PWM**（`pwm_project`）—— 用方波调亮度，做了个呼吸灯。
@@ -20,16 +24,18 @@
 
 > 每个工程目录下还有一份自己的 README，写了接线方法和运行现象；源码注释里也尽量把「为什么这么写」讲清楚了。
 
-## 综合练习工程
+## practice_projects（练习工程）
 
-单个外设学完之后，把它们拼起来做的一些小练习：
+这几个是一个想法一个工程敲出来的综合练习，功能更杂一些：
 
-- `lianxi_1_project` —— 基础工程：先点灯，后来加了 OLED 显示 DHT11 温湿度。
-- `LINK_project` —— 流水灯，三颗 LED 用状态机轮流亮。
-- `interrupt_project` —— 外部中断 + SysTick 状态机做按键消抖。
-- `key_project` —— 轮询 + 20ms 软件消抖。
-- `serial_project` —— 串口收指令，控制三路 LED 亮灭。
-- `TIM_project` —— TIM4 定时器基础配置。
+- `interrupt_project` —— 外部中断（EXTI3）+ SysTick 状态机消抖
+- `key_project` —— 轮询 + 20ms 软件消抖，控制两路 LED
+- `lianxi_1_project` —— 板载 LED + OLED 显示 DHT11 温湿度
+- `LINK_project` —— 三路 LED 流水灯状态机
+- `serial_project` —— 串口指令控制 LED
+- `serial_DMA_project` —— 串口 + DMA
+- `chuankou_zhonduang_project` —— 串口中断
+- `TIM_project` —— TIM4 定时器基础
 
 ## 硬件平台
 
