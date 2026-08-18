@@ -8,15 +8,17 @@
 
 | 外设 | 目录 | 练习内容 | 进度 |
 |------|------|----------|------|
-| GPIO | `gpio_project` | LED 闪烁、流水灯状态机 | 待完善 |
+| GPIO | `gpio_project` | LED 闪烁（开时钟→配置→使用→死循环四步套路） | 已完成 |
 | TIM | `TIM_project` | 定时器时基、更新中断 | 已有基础 |
-| ADC | `adc_project` | 采样与电压换算 | 待完善 |
-| UART | `uart_project` | 串口收发、指令解析 | 待完善 |
-| PWM | `pwm_project` | PWM 输出、呼吸灯 | 待完善 |
-| EXTI | `exti_project` | 外部中断 + SysTick 状态机消抖 | 待完善 |
-| DMA | `dma_project` | 内存与外设间数据搬运 | 待完善 |
-| I2C | `i2c_project` | I2C 驱动 SSD1306 OLED | 待完善 |
-| 单总线 | `onewire_project` | DHT11 温湿度读取与校验 | 待完善 |
+| ADC | `adc_project` | 采样与电压换算（电压控制 LED 闪烁快慢） | 已完成 |
+| UART | `uart_project` | 串口收发、回声测试（115200 8N1） | 已完成 |
+| PWM | `pwm_project` | TIM3 PWM 输出、呼吸灯 | 已完成 |
+| EXTI | `exti_project` | 外部中断按键翻转 LED | 已完成 |
+| DMA | `dma_project` | 内存到串口的 DMA 搬运 | 已完成 |
+| I2C | `i2c_project` | I2C 驱动 SSD1306 OLED | 已完成 |
+| 单总线 | `onewire_project` | DHT11 温湿度读取与校验 | 已完成 |
+
+> 每个外设学习工程目录下都有一份独立 `README.md`，说明学习目标、硬件接线、运行现象和关键知识点；源码内也带了逐行中文注释。
 
 ## 综合练习工程
 
@@ -72,6 +74,8 @@ TIM4 定时器基础练习。配置预分频 7199、自动重载 65535，练习�
 3. 连接 ST-Link 后编译、下载、运行。
 
 工程由 CubeMX 生成，也可直接打开 `*.ioc` 重新生成代码。命令行构建需自行安装 `arm-none-eabi-gcc` 工具链，产物输出在 `Debug/`。
+
+其中 9 个外设学习工程为「纯源码」版本：含 `Core/`、`Drivers/`、链接脚本 `.ld` 与 `.mxproject`，可被 STM32CubeIDE 直接作为已有工程导入构建；为保持简洁未包含 `.ioc`（如需 CubeMX 图形化配置，可用相同引脚参数自行新建 `.ioc`）。综合练习工程则保留了 `.ioc`。
 
 ## 版本控制
 
