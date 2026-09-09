@@ -1,25 +1,10 @@
-# dma_project — DMA 直接存储器访问
+# dma_project
 
-**学什么**：让数据「自己」流动，CPU 不用一个字节一个字节地搬。
+让 DMA 替串口发数据，串口助手每秒收到一句话，CPU 不参与搬。
 
-## 硬件接线
+- 通道不能乱选：USART2_TX 固定就是 DMA1 通道 7，手册里查的映射表。
+- 内存端 MINC 递增、外设端 PINC 不递增（数据寄存器就一个地址），一开始两边都开了递增，发出来的全是乱码。
+- `__HAL_LINKDMA` 把通道挂到串口句柄上，之后 `HAL_UART_Transmit_DMA` 直接用。
+- 发完会进 `DMA1_Channel7_IRQHandler`，真正收尾的是 `HAL_DMA_IRQHandler`。
 
-| 引脚 | 功能 | 说明 |
-|------|------|------|
-| PA2  | USART2_TX | 接 USB 转串口的 RX（用于看现象） |
-
-## 运行现象
-
-串口助手（115200）每 1 秒刷出一句话——这句话是 DMA 从内存搬到串口发出去的。
-
-## 关键知识点
-
-- **方向** `DMA_MEMORY_TO_PERIPH`：内存 → 外设。
-- **地址是否递增**：内存递增（`MINC_ENABLE`），外设不递增（`PINC_DISABLE`，就那一个数据寄存器）。
-- **通道是固定的**：USART2_TX 用 DMA1 通道 7（芯片手册规定的映射，不能乱选）。
-- 用 `__HAL_LINKDMA` 把 DMA 通道「挂」到串口上，`HAL_UART_Transmit_DMA` 才能用。
-- 搬完后 `DMA1_Channel7_IRQHandler` 触发，交给 `HAL_DMA_IRQHandler` 收尾。
-
-## 构建
-
-用 STM32CubeIDE 导入本目录，或用 `arm-none-eabi-gcc` 编译 `Core/`、`Drivers/` 下的源码。
+接线：PA2 接 USB 转串口 RX。

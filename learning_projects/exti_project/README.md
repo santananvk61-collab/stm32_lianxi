@@ -1,26 +1,10 @@
-# exti_project — EXTI 外部中断
+# exti_project
 
-**学什么**：让引脚电平变化「打断」CPU，理解中断 vs 轮询。
+按键按一下 LED 翻转一次，主循环是空的——全靠中断，第一次体会"轮询 vs 中断"的差别。
 
-## 硬件接线
+- 中断三步：配 `GPIO_MODE_IT_FALLING` → `HAL_NVIC_EnableIRQ` 开门 → 写 `EXTI1_IRQHandler`。漏第二步引脚怎么按都没反应。
+- 中断里不直接写逻辑，`HAL_GPIO_EXTI_IRQHandler` 会回调 `HAL_GPIO_EXTI_Callback`，事写在回调里。
+- 上拉 + 按下接地 = 下降沿触发，这个组合想通了就记住了。
+- EXTI 引脚映射要开 AFIO 时钟，这个最阴，不报错就是不工作。
 
-| 引脚 | 功能 | 说明 |
-|------|------|------|
-| PA1  | 按键输入 | 一端接 PA1，一端接 GND，内部上拉 |
-| PC13 | 板载 LED | 低电平点亮 |
-
-## 运行现象
-
-每按一次按键，板载 LED 翻转一次。主循环里什么都没做——全靠中断。
-
-## 关键知识点
-
-- **轮询**是 CPU 反复问「变了吗」，**中断**是引脚主动说「我变了」。
-- 中断三步：①配成 `GPIO_MODE_IT_FALLING` → ②`HAL_NVIC_SetPriority/EnableIRQ` 开门 → ③写 `EXTI1_IRQHandler`。
-- `EXTI1_IRQHandler` 里调 `HAL_GPIO_EXTI_IRQHandler`，它最终回调 `HAL_GPIO_EXTI_Callback`（我们在这里做事）。
-- 下降沿 + 上拉：按下时引脚从高变低 = 下降沿。
-- 外部中断的引脚映射需要 AFIO 时钟（`HAL_MspInit` 里已开）。
-
-## 构建
-
-用 STM32CubeIDE 导入本目录，或用 `arm-none-eabi-gcc` 编译 `Core/`、`Drivers/` 下的源码。
+接线：PA1 一端接按键一端接 GND（内部上拉），PC13 板载 LED。

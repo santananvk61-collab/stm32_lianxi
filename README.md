@@ -1,29 +1,28 @@
-﻿# stm32_git — STM32 学习仓库
+﻿# stm32_git
 
-这是我从零学 STM32 时留下的练习仓库。
+从零学 STM32 的练习仓库。
 
-用的是一块十几块钱的 Blue Pill（STM32F103C8Tx，Cortex-M3）。一开始我只会点亮一颗 LED，后来陆陆续续把 GPIO、定时器、串口、ADC、PWM、中断、DMA、I2C、单总线、看门狗这些外设都摸了一遍。每个外设单独开了一个工程，代码里写满了中文注释，方便以后回头看——也方便有同样困惑的人照着走。
+板子是一块十几块钱的 Blue Pill（STM32F103C8Tx），从只会点灯开始，一个外设一个外设往外摸，每个外设单独一个工程，代码里中文注释写得很密——主要是给自己看的，隔几个月回来还能想起来当时为什么这么写。
 
-## learning_projects（学习工程，共 9 个）
+## learning_projects（9 个学习工程）
 
-嵌入式入门有个规律：先跑通「点灯」这个最经典的 Hello World，再一个外设一个外设往外扩。这里每个工程只学一个外设：
+| 工程 | 内容 |
+|------|------|
+| `gpio_project` | 点灯 + 流水灯，固定"开时钟→配引脚→使用"的套路 |
+| `pwm_project` | TIM 时基 + PWM 呼吸灯，占空比调亮度 |
+| `uart_project` | 串口回声，第一次跟电脑"对话" |
+| `adc_project` | 电位器采样，读数换算电压控制 LED 闪速 |
+| `dma_project` | DMA 替串口发数据，CPU 不动手 |
+| `exti_project` | 外部中断按键翻转 LED，主循环是空的 |
+| `i2c_project` | 两根线点亮 SSD1306 OLED |
+| `onewire_project` | 单总线读 DHT11，微秒级时序 + DWT 延时 |
+| `iwdg_project` | 独立看门狗，1s 超时喂狗，附"故意饿死它"实验 |
 
-- **GPIO**（`gpio_project`）—— 点灯。套路就四步：开时钟 → 配置引脚 → 使用 → 死循环。
-- **TIM / PWM**（`pwm_project`）—— 定时器时基 + 用方波调亮度，做了个呼吸灯。
-- **UART**（`uart_project`）—— 串口，让 MCU 跟电脑聊天。做的是「回声」：敲什么就回什么。
-- **ADC**（`adc_project`）—— 把模拟电压变成数字，转出来的值直接控制 LED 闪多快。
-- **DMA**（`dma_project`）—— 让数据自己流动，CPU 不用一个字节一个字节搬。这里让 DMA 替串口发数据。
-- **EXTI + SysTick**（`exti_project`）—— 外部中断，引脚电平一变就打断 CPU，按键翻转 LED。
-- **I2C**（`i2c_project`）—— 两根线驱动一块 0.96 寸 OLED 屏。
-- **单总线**（`onewire_project`）—— 一根线读 DHT11 温湿度。
-- **IWDG**（`iwdg_project`）—— 独立看门狗，超时复位机制防止系统死锁。附「故意饿死看门狗」实验。
-
-> 每个工程目录下还有一份自己的 README，写了接线方法、运行现象和关键知识点；源码注释里也尽量把「为什么这么写」讲清楚了。调试时踩过的坑（OLED 字符乱码、I2C 跑不稳降速、字库位序不对导致整字颠倒之类）就记在各工程的 README 和注释里——踩坑记录往往比代码本身更有用。
+每个工程目录下有 README，记的是接线、现象和自己当时踩的坑（`Prescaler` 的 +1、AFIO 时钟、OLED 降速到 100kHz、DMA 递增开错边……）。对我自己来说坑比代码值钱。
 
 ## 硬件平台
 
-- 主控：STM32F103C8Tx（Cortex-M3）
-- 开发板：Blue Pill（蓝色小板）
+- 主控：STM32F103C8Tx（Cortex-M3），Blue Pill
 - 板载 LED：PC13，低电平点亮
 - 下载调试：ST-Link（SWD）
 - 开发环境：STM32CubeIDE + HAL 库
