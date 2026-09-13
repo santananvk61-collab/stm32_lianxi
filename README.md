@@ -18,7 +18,7 @@
 | `OLED` | I2C1 | PB6 / PB7 两根线点 SSD1306，自己配了 8x16 的 ASCII 字库 |
 | `iwdg_project` | IWDG | 独立看门狗，1s 超时、主循环 100ms 喂一次，附"故意饿死它"实验 |
 
-9 个都是完整的 CubeIDE 工程，`File > Import > Existing Projects into Workspace` 导进来就能编译、下载、调试。
+9 个工程都保留了 `.ioc` 与完整源码，用 STM32CubeMX 打开 `.ioc` 重新生成工程后即可编译下载。
 
 ## 硬件平台
 
