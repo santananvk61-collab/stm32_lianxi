@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>OLED 8x16 字库预览</title>
+<style>
+  body{font-family:"Microsoft YaHei",Arial,sans-serif;background:#f5f5f5;color:#222;margin:18px;}
+  h2{margin:0 0 4px;font-size:18px;}
+  .sub{color:#666;font-size:13px;margin-bottom:12px;}
+  .wrap{display:flex;gap:22px;flex-wrap:wrap;align-items:flex-start;}
+  canvas{background:#000;border:2px solid #333;border-radius:4px;image-rendering:pixelated;}
+  .panel{width:320px;font-size:13px;line-height:1.6;}
+  label{display:block;margin:8px 0 2px;font-weight:bold;}
+  input[type=text]{width:100%;padding:4px;font-size:13px;}
+  .val{color:#c00;font-weight:bold;}
+  table{border-collapse:collapse;margin-top:8px;font-size:12.5px;}
+  td,th{border:1px solid #ccc;padding:3px 8px;}
+  th{background:#eee;}
+  .ok{color:#1a9e1a;font-weight:bold;} .bad{color:#c00;font-weight:bold;}
+  .fit{margin-top:8px;font-size:13px;}
+  .legend{font-size:12px;margin-top:8px;}
+  .sw{display:inline-block;width:12px;height:12px;vertical-align:middle;margin-right:4px;border-radius:2px;}
+  h3{font-size:15px;margin:18px 0 6px;}
+  #glyphs{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;max-width:760px;}
+  .g{background:#fff;border:1px solid #ddd;border-radius:3px;padding:3px;text-align:center;}
+  .g canvas{background:#000;display:block;margin:0 auto;}
+  .g small{color:#666;font-size:10px;}
+</style>
+</head>
+<body>
+<h2>SSD1306 OLED · 8x16 字库预览</h2>
+<div class="sub">每个字符 8 宽 16 高，比 5x7 清楚得多。屏幕 128x64；右上角格子 = x[42,127] × y[0,31]。</div>
+<div class="wrap">
+  <canvas id="cv" width="512" height="256"></canvas>
+  <div class="panel">
+    <label>格子里的文字：</label>
+    <input type="text" id="txt" value="OLED">
+    <button id="center" style="margin-top:6px;padding:5px 10px;cursor:pointer;">右上角格子自动居中</button>
+    <table>
+      <tr><th>项目</th><th>数值</th></tr>
+      <tr><td>单字符宽</td><td>8 px（无间距）</td></tr>
+      <tr><td>文字总宽</td><td><span id="tw"></span> px</td></tr>
+      <tr><td>文字总高</td><td>16 px</td></tr>
+      <tr><td>居中光标 X</td><td class="val" id="cx"></td></tr>
+      <tr><td>居中光标 Y</td><td class="val" id="cy"></td></tr>
+      <tr><td>左边距(距42)</td><td id="mL"></td></tr>
+      <tr><td>右边距(距127)</td><td id="mR"></td></tr>
+      <tr><td>上边距(距0)</td><td id="mT"></td></tr>
+      <tr><td>下边距(距31)</td><td id="mB"></td></tr>
+    </table>
+    <div class="fit" id="fit"></div>
+    <div class="legend">
+      <div><span class="sw" style="background:#fff"></span>8x16 文字</div>
+      <div><span class="sw" style="background:#9a9a9a"></span>格子线</div>
+      <div><span class="sw" style="background:#2ce"></span>格子中心 (84.5,15.5)</div>
+      <div><span class="sw" style="background:#fa3"></span>包围框（红=溢出）</div>
+    </div>
+    <p style="margin-top:10px;">提示：8x16 一个字符就 8px 宽，"HELLO WORD!"(11字=88px) 比右上角格子(85px)略宽，放不下；短标签如 "OLED" 正合适。</p>
+  </div>
+</div>
+
+<h3>字库全览（0x20 ~ 0x7E，每个字符 8x16 原样放大 2 倍）</h3>
+<div id="glyphs"></div>
+
+<script>
+const FONT8x16 = [
+  [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,248,0,0,0,0,0,0,0,51,48,0,0,0],
+  [0,16,12,6,16,12,6,0,0,0,0,0,0,0,0,0],
+  [64,192,120,64,192,120,64,0,4,63,4,4,63,4,4,0],
+  [0,112,136,252,8,48,0,0,0,24,32,255,33,30,0,0],
+  [240,8,240,0,224,24,0,0,0,33,28,3,30,33,30,0],
+  [0,240,8,136,112,0,0,0,30,33,35,36,25,39,33,16],
+  [16,22,14,0,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,0,224,24,4,2,0,0,0,0,7,24,32,64,0],
+  [0,2,4,24,224,0,0,0,0,64,32,24,7,0,0,0],
+  [64,64,128,240,128,64,64,0,2,2,1,15,1,2,2,0],
+  [0,0,0,240,0,0,0,0,1,1,1,31,1,1,1,0],
+  [0,0,0,0,0,0,0,0,128,176,112,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1],
+  [0,0,0,0,0,0,0,0,0,48,48,0,0,0,0,0],
+  [0,0,0,0,128,96,24,4,0,96,24,6,1,0,0,0],
+  [0,224,16,8,8,16,224,0,0,15,16,32,32,16,15,0],
+  [0,16,16,248,0,0,0,0,0,32,32,63,32,32,0,0],
+  [0,112,8,8,8,136,112,0,0,48,40,36,34,33,48,0],
+  [0,48,8,136,136,72,48,0,0,24,32,32,32,17,14,0],
+  [0,0,192,32,16,248,0,0,0,7,4,36,36,63,36,0],
+  [0,248,8,136,136,8,8,0,0,25,33,32,32,17,14,0],
+  [0,224,16,136,136,24,0,0,0,15,17,32,32,17,14,0],
+  [0,56,8,8,200,56,8,0,0,0,0,63,0,0,0,0],
+  [0,112,136,8,8,136,112,0,0,28,34,33,33,34,28,0],
+  [0,224,16,8,8,16,224,0,0,0,49,34,34,17,15,0],
+  [0,0,0,192,192,0,0,0,0,0,0,48,48,0,0,0],
+  [0,0,0,128,0,0,0,0,0,0,128,96,0,0,0,0],
+  [0,0,128,64,32,16,8,0,0,1,2,4,8,16,32,0],
+  [64,64,64,64,64,64,64,0,4,4,4,4,4,4,4,0],
+  [0,8,16,32,64,128,0,0,0,32,16,8,4,2,1,0],
+  [0,112,72,8,8,8,240,0,0,0,0,48,54,1,0,0],
+  [192,48,200,40,232,16,224,0,7,24,39,36,35,20,11,0],
+  [0,0,192,56,224,0,0,0,32,60,35,2,2,39,56,32],
+  [8,248,136,136,136,112,0,0,32,63,32,32,32,17,14,0],
+  [192,48,8,8,8,8,56,0,7,24,32,32,32,16,8,0],
+  [8,248,8,8,8,16,224,0,32,63,32,32,32,16,15,0],
+  [8,248,136,136,232,8,16,0,32,63,32,32,35,32,24,0],
+  [8,248,136,136,232,8,16,0,32,63,32,0,3,0,0,0],
+  [192,48,8,8,8,56,0,0,7,24,32,32,34,30,2,0],
+  [8,248,8,0,0,8,248,8,32,63,33,1,1,33,63,32],
+  [0,8,8,248,8,8,0,0,0,32,32,63,32,32,0,0],
+  [0,0,8,8,248,8,8,0,192,128,128,128,127,0,0,0],
+  [8,248,136,192,40,24,8,0,32,63,32,1,38,56,32,0],
+  [8,248,8,0,0,0,0,0,32,63,32,32,32,32,48,0],
+  [8,248,248,0,248,248,8,0,32,63,0,63,0,63,32,0],
+  [8,248,48,192,0,8,248,8,32,63,32,0,7,24,63,0],
+  [224,16,8,8,8,16,224,0,15,16,32,32,32,16,15,0],
+  [8,248,8,8,8,8,240,0,32,63,33,1,1,1,0,0],
+  [224,16,8,8,8,16,224,0,15,24,36,36,56,80,79,0],
+  [8,248,136,136,136,136,112,0,32,63,32,0,3,12,48,32],
+  [0,112,136,8,8,8,56,0,0,56,32,33,33,34,28,0],
+  [24,8,8,248,8,8,24,0,0,0,32,63,32,0,0,0],
+  [8,248,8,0,0,8,248,8,0,31,32,32,32,32,31,0],
+  [8,120,136,0,0,200,56,8,0,0,7,56,14,1,0,0],
+  [248,8,0,248,0,8,248,0,3,60,7,0,7,60,3,0],
+  [8,24,104,128,128,104,24,8,32,48,44,3,3,44,48,32],
+  [8,56,200,0,200,56,8,0,0,0,32,63,32,0,0,0],
+  [16,8,8,8,200,56,8,0,32,56,38,33,32,32,24,0],
+  [0,0,0,254,2,2,2,0,0,0,0,127,64,64,64,0],
+  [0,12,48,192,0,0,0,0,0,0,0,1,6,56,192,0],
+  [0,2,2,2,254,0,0,0,0,64,64,64,127,0,0,0],
+  [0,0,4,2,2,2,4,0,0,0,0,0,0,0,0,0],
+  [0,0,0,0,0,0,0,0,128,128,128,128,128,128,128,128],
+  [0,2,2,4,0,0,0,0,0,0,0,0,0,0,0,0],
+  [0,0,128,128,128,128,0,0,0,25,36,34,34,34,63,32],
+  [8,248,0,128,128,0,0,0,0,63,17,32,32,17,14,0],
+  [0,0,0,128,128,128,0,0,0,14,17,32,32,32,17,0],
+  [0,0,0,128,128,136,248,0,0,14,17,32,32,16,63,32],
+  [0,0,128,128,128,128,0,0,0,31,34,34,34,34,19,0],
+  [0,128,128,240,136,136,136,24,0,32,32,63,32,32,0,0],
+  [0,0,128,128,128,128,128,0,0,107,148,148,148,147,96,0],
+  [8,248,0,128,128,128,0,0,32,63,33,0,0,32,63,32],
+  [0,128,152,152,0,0,0,0,0,32,32,63,32,32,0,0],
+  [0,0,0,128,152,152,0,0,0,192,128,128,128,127,0,0],
+  [8,248,0,0,128,128,128,0,32,63,36,2,45,48,32,0],
+  [0,8,8,248,0,0,0,0,0,32,32,63,32,32,0,0],
+  [128,128,128,128,128,128,128,0,32,63,32,0,63,32,0,63],
+  [128,128,0,128,128,128,0,0,32,63,33,0,0,32,63,32],
+  [0,0,128,128,128,128,0,0,0,31,32,32,32,32,31,0],
+  [128,128,0,128,128,0,0,0,128,255,161,32,32,17,14,0],
+  [0,0,0,128,128,128,128,0,0,14,17,32,32,160,255,128],
+  [128,128,128,0,128,128,128,0,32,32,63,33,32,0,1,0],
+  [0,0,128,128,128,128,128,0,0,51,36,36,36,36,25,0],
+  [0,128,128,224,128,128,0,0,0,0,0,31,32,32,0,0],
+  [128,128,0,0,0,128,128,0,0,31,32,32,32,16,63,32],
+  [128,128,128,0,0,128,128,128,0,1,14,48,8,6,1,0],
+  [128,128,0,128,0,128,128,128,15,48,12,3,12,48,15,0],
+  [0,128,128,0,128,128,128,0,0,32,49,46,14,49,32,0],
+  [128,128,128,0,0,128,128,128,128,129,142,112,24,6,1,0],
+  [0,128,128,128,128,128,128,0,0,33,48,44,34,33,48,0],
+  [0,0,0,0,128,124,2,2,0,0,0,0,0,63,64,64],
+  [0,0,0,0,255,0,0,0,0,0,0,0,255,0,0,0],
+  [0,2,2,124,128,0,0,0,0,64,64,63,0,0,0,0],
+  [0,6,1,1,2,2,4,4,0,0,0,0,0,0,0,0]
+];
+const Sd=4, W=128, H=64;
+const cv=document.getElementById('cv'), ctx=cv.getContext('2d');
+function px(x,y,c){ if(x<0||x>=W||y<0||y>=H) return; ctx.fillStyle=c; ctx.fillRect(x*Sd,y*Sd,Sd,Sd); }
+function line(x0,y0,x1,y1,c){ let dx=Math.abs(x1-x0),dy=Math.abs(y1-y0),sx=x0<x1?1:-1,sy=y0<y1?1:-1,err=dx-dy;
+  while(true){ px(x0,y0,c); if(x0===x1&&y0===y1) break; let e2=2*err; if(e2>-dy){err-=dy;x0+=sx;} if(e2<dx){err+=dx;y0+=sy;} } }
+function draw8x16(str,cx,cy,c){
+  let x=cx;
+  for(const ch of str){
+    let code=ch.charCodeAt(0); if(code<0x20||code>0x7E) code=0x20;
+    const g=FONT8x16[code-0x20];
+    for(let row=0;row<16;row++){ const b=g[row];
+      for(let col=0;col<8;col++) if(b&(0x80>>col)) px(x+col,cy+row,c); }
+    x+=8;
+  }
+}
+function render(){
+  const str=document.getElementById('txt').value||' ';
+  ctx.fillStyle='#000'; ctx.fillRect(0,0,cv.width,cv.height);
+  [[0,0,127,0],[0,0,0,63],[0,63,127,63],[127,0,127,63],[42,0,42,63],[42,31,127,31]].forEach(l=>line(l[0],l[1],l[2],l[3],'#9a9a9a'));
+  const tw=8*str.length, th=16;
+  const cx=42+Math.floor((85-tw)/2), cy=Math.floor((31-th)/2);
+  document.getElementById('cx').textContent=cx; document.getElementById('cy').textContent=cy;
+  draw8x16(str,cx,cy,'#ffffff');
+  const L=cx,R=cx+tw-1,T=cy,B=cy+th-1;
+  const of=(L<42)||(R>127)||(T<0)||(B>31);
+  ctx.strokeStyle=of?'#f33':'#fa3'; ctx.lineWidth=1; ctx.strokeRect(L*Sd,T*Sd,(R-L+1)*Sd,(B-T+1)*Sd);
+  ctx.strokeStyle='#2ce'; line(80,15,89,15,'#2ce'); line(84,11,84,20,'#2ce');
+  document.getElementById('tw').textContent=tw;
+  const mL=L-42,mR=127-R,mT=T,mB=31-B;
+  function cell(id,v){const e=document.getElementById(id); e.textContent=v+' px'; e.className=(v>=0)?'ok':'bad';}
+  cell('mL',mL);cell('mR',mR);cell('mT',mT);cell('mB',mB);
+  const fit=document.getElementById('fit');
+  if(of){ fit.className='fit bad'; fit.innerHTML='⚠ 文字比格子宽，放不进右上角格子！用更短的文字或放大倍数调小。'; }
+  else { fit.className='fit ok'; fit.innerHTML='✓ 正好居中落在右上角格子里。'; }
+}
+document.getElementById('txt').addEventListener('input',render);
+document.getElementById('center').addEventListener('click',render);
+
+// 字库全览
+const gwrap=document.getElementById('glyphs');
+for(let i=0;i<95;i++){
+  const code=0x20+i, ch=String.fromCharCode(code);
+  const d=document.createElement('div'); d.className='g';
+  const c=document.createElement('canvas'); c.width=16; c.height=32; const g=c.getContext('2d');
+  g.fillStyle='#000'; g.fillRect(0,0,16,32);
+  const gl=FONT8x16[i];
+  for(let r=0;r<16;r++){ const b=gl[r]; for(let col=0;col<8;col++) if(b&(0x80>>col)){ g.fillStyle='#fff'; g.fillRect(col*2,r*2,2,2);} }
+  d.appendChild(c);
+  const s=document.createElement('small'); s.textContent= ch===' '?'sp':ch; d.appendChild(s);
+  gwrap.appendChild(d);
+}
+render();
+</script>
+</body>
+</html>

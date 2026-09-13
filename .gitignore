@@ -37,6 +37,9 @@ Release/
 Thumbs.db
 *.swp
 *~
+.idea/
+CMakeLists_template.txt
+mx.scratch
 
 # ---------- 本地私有配置 ----------
 .local/

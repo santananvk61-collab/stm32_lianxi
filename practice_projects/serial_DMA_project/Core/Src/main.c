@@ -41,14 +41,17 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
+DMA_HandleTypeDef hdma_usart2_rx;
 
 /* USER CODE BEGIN PV */
-  uint8_t received_data[2];
+  uint8_t received_data[64];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
@@ -61,7 +64,7 @@ static void MX_USART2_UART_Init(void);
   {
     if (huart->Instance == USART2) 
     {
-      HAL_UART_Transmit_IT(&huart2, received_data, 2);
+      HAL_UART_Transmit_DMA(&huart2, received_data, 2);
       GPIO_PinState state = GPIO_PIN_RESET;
       if (received_data[1] == '1') 
       {
@@ -83,7 +86,19 @@ static void MX_USART2_UART_Init(void);
       {
         HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, state);
       }
-      HAL_UART_Receive_IT(&huart2, received_data, 2);
+      HAL_UART_Receive_DMA(&huart2, received_data, 2);
+    }
+  }
+
+  //不定长中断回调函数，当串口转为空闲时会调用该函数
+  void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+  {
+    if(huart == &huart2)
+    {
+      HAL_UART_Transmit_DMA(&huart2, received_data, Size);
+
+      HAL_UARTEx_ReceiveToIdle_DMA(&huart2, received_data, sizeof(received_data));
+      __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
     }
   }
 /* USER CODE END 0 */
@@ -117,9 +132,14 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-    HAL_UART_Receive_IT(&huart2, received_data, 2);
+    // HAL_UART_Receive_DMA(&huart2, received_data, 2);  接收定长数据
+    HAL_UARTEx_ReceiveToIdle_DMA(&huart2, received_data, sizeof(received_data));//接收不定长数据
+    //DMA模式多一个传输过半中断
+    //DMA关闭函数 选择DMA地址（哪个串口，rx还是tx），选择函数这里为传输过半中断函数
+    __HAL_DMA_DISABLE_IT(&hdma_usart2_rx, DMA_IT_HT);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -200,6 +220,25 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
 
   /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
+  * Enable DMA controller clock
+  */
+static void MX_DMA_Init(void)
+{
+
+  /* DMA controller clock enable */
+  __HAL_RCC_DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  /* DMA1_Channel6_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel6_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel6_IRQn);
+  /* DMA1_Channel7_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel7_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel7_IRQn);
 
 }
 
