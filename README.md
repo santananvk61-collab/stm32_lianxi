@@ -18,7 +18,7 @@
 | `OLED` | I2C1 | PB6 / PB7 两根线点 SSD1306，自己配了 8x16 的 ASCII 字库 |
 | `iwdg_project` | IWDG | 独立看门狗，1s 超时、主循环 100ms 喂一次，附"故意饿死它"实验 |
 
-9 个工程都保留了 `.ioc` 与完整源码，用 STM32CubeMX 打开 `.ioc` 重新生成工程后即可编译下载。
+9 个工程都保留了完整源码（`Core` / `Drivers` / 链接脚本），其中 8 个另附 `.ioc` 工程配置；用 STM32CubeMX 打开 `.ioc` 重新生成工程后即可编译下载（`iwdg_project` 未附 `.ioc`，IWDG 参数见该工程的 README）。
 
 ## 硬件平台
 
