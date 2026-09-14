@@ -20,19 +20,8 @@
 | `OLED` | I2C1 | PB6 / PB7 两根线点 SSD1306，片内建页缓冲、改完一次性整屏刷新；接入公有领域的 8×16 ASCII 字库后，自写画点 / 画线 / 字符串显示 |
 | `iwdg_project` | IWDG | 独立看门狗，Prescaler=8 / Reload=4095（LSI≈40kHz 下约 0.8s 超时），主循环 100ms 喂一次 |
 
-9 个工程都留了各自的 `.ioc` 配置和完整源码（`Core` / `Drivers` / 启动文件 / 链接脚本）。
-
-**怎么把它们跑起来**：用 STM32CubeMX（或 CubeIDE 里内置的 CubeMX 视图）打开某个工程的 `.ioc`，点 `Generate Code` 重新生成一遍，就能编译、下载。
-
-**一句提醒**：仓库里没有 CubeIDE 的工程文件——`.cproject` / `.project` 这类文件被 `.gitignore` 排除了（它们体积不小、又跟着本地路径变，放进来没意义）。所以没法直接 `File > Import > Existing Projects into Workspace` 一把导进来，得先走上面那步生成。
-
 ## 硬件平台
 
 - 主控：STM32F103C8Tx（Cortex-M3），Blue Pill
 - 板载 LED：PC13，低电平点亮
 - 下载调试：ST-Link（SWD）
-
-## 开发环境
-
-- **外设配置**：STM32CubeMX 生成 HAL 库代码
-- **编写与构建**：Trae 配 STM32 / CMake 插件包，arm-none-eabi-gcc + CMake / Ninja 编译
