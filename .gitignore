@@ -51,5 +51,12 @@ mx.scratch
 # ---------- CMake 构建产物（显式小写，避免跨平台漏网） ----------
 build/
 
-# ---------- IDE 本地绝对路径配置 ----------
-**/.vscode/settings.json
+# ---------- IDE / CubeMX 本地缓存（不入库） ----------
+*.mxproject
+**/.clangd
+**/.vscode/
+**/.settings/
+
+# ---------- 方案文档与字模预览页（只留本地） ----------
+phxc_project/平衡小车软件方案.md
+learning_projects/OLED/*_preview.html
